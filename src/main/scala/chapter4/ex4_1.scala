@@ -1,5 +1,7 @@
 package chapter4
 
+import chapter4.ex4_7.Either
+
 object ex4_1 {
 
   sealed trait Option[+A] {
@@ -218,11 +220,88 @@ object ex4_5 {
 
   def traverse[A, B](a: List[A])(f: A => Option[B]): Option[List[B]] = a match {
     case Nil => Some(List.empty[B])
-    case hd::tl => f(hd) match {
+    case hd :: tl => f(hd) match {
       case None => None
       case Some(a) => traverse(tl)(f).map(a +: _)
     }
   }
+
+
+}
+
+object ex4_6 {
+
+  sealed trait Either[+E, +A] {
+    def map[B](f: A => B): Either[E, B] = this match {
+      case left: Left[E] => left
+      case Right(value) => Right(f(value))
+    }
+
+    def flatMap[EE >: E, B](f: A => Either[EE, B]): Either[EE, B] = this match {
+      case left: Left[E] => left
+      case Right(value) => f(value)
+    }
+
+    def orElse[EE >: E, B >: A](b: => Either[EE, B]): Either[EE, B] = this match {
+      case right: Right[A] => right
+      case _: Left[E] => b
+    }
+
+    def map2[EE >: E, B, C](b: Either[EE, B])(f: (A, B) => C): Either[EE, C] =
+      this.flatMap(a => b.map(b => f(a,b)))
+
+  }
+
+  case class Left[+E](value: E) extends Either[E, Nothing]
+
+  case class Right[+A](value: A) extends Either[Nothing, A]
+
+
+}
+
+object ex4_7 {
+
+  sealed trait Either[+E, +A] {
+    def map[B](f: A => B): Either[E, B] = this match {
+      case left: Left[E] => left
+      case Right(value) => Right(f(value))
+    }
+
+    def flatMap[EE >: E, B](f: A => Either[EE, B]): Either[EE, B] = this match {
+      case left: Left[E] => left
+      case Right(value) => f(value)
+    }
+
+    def orElse[EE >: E, B >: A](b: => Either[EE, B]): Either[EE, B] = this match {
+      case right: Right[A] => right
+      case _: Left[E] => b
+    }
+
+    def map2[EE >: E, B, C](b: Either[EE, B])(f: (A, B) => C): Either[EE, C] =
+      this.flatMap(a => b.map(b => f(a,b)))
+
+  }
+
+  def sequence[E,A](es:List[Either[E,A]]):Either[E,List[A]] = {
+    def go(es:List[Either[E,A]], acc:Either[E,List[A]]):Either[E,List[A]] = es match {
+      case Nil => acc
+      case Right(a:A) => acc.map(list => a +: list)
+      case Left(e:E) => Left(e)
+    }
+    go(es, Right(List()))
+  }
+
+  def traverse[E, A, B](as: List[A])(f: A => Either[E, B]): Either[E, List[B]] = as match {
+    case Nil => Right(List())
+    case hd::tl => f(hd) match {
+      case Left(e) => Left(e)
+      case Right(a) => traverse(tl)(f).map(a +: _)
+    }
+  }
+
+  case class Left[+E](value: E) extends Either[E, Nothing]
+
+  case class Right[+A](value: A) extends Either[Nothing, A]
 
 
 }
