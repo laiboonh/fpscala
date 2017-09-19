@@ -1841,7 +1841,9 @@ object ex3_29 {
 
   def maximum(tree: Tree[Int]): Int = fold(tree)(a => a)((l, r) => maximum(l) max maximum(r))
 
-  def depth[A](tree: Tree[A]): Int = fold(tree)(_ => 0)((l, r)=> depth(l)+1 max depth(r)+1)
+  def depth[A](tree: Tree[A]): Int = fold(tree)(_ => 0)((l, r) => depth(l) + 1 max depth(r) + 1)
 
-  def map[A, B](tree: Tree[A])(f: A => B): Tree[B] = fold(tree)(value => Leaf(f(value)):Tree[B])((l, r) => Branch(map(l)(f), map(r)(f)))
+  def map[A, B](tree: Tree[A])(f: A => B): Tree[B] = fold(tree)(value => Leaf(f(value)): Tree[B])((
+    l,
+    r) => Branch(map(l)(f), map(r)(f)))
 }
