@@ -285,8 +285,8 @@ object ex4_7 {
   def sequence[E,A](es:List[Either[E,A]]):Either[E,List[A]] = {
     def go(es:List[Either[E,A]], acc:Either[E,List[A]]):Either[E,List[A]] = es match {
       case Nil => acc
-      case Right(a:A) => acc.map(list => a +: list)
-      case Left(e:E) => Left(e)
+      case Right(a)::_ => acc.map(list => a +: list)
+      case Left(e)::_ => Left(e)
     }
     go(es, Right(List()))
   }
